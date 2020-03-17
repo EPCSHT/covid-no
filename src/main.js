@@ -44,7 +44,7 @@ Apify.main(async () => {
                 infected,
                 infectedByRegion,
                 sourceUrl,
-                lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, now.getMinutes())).toISOString(),
+                lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
                 readMe: 'https://apify.com/tugkan/covid-no',
             };
 
