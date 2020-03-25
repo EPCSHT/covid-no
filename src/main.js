@@ -29,9 +29,9 @@ Apify.main(async () => {
 
             // Load with Cheerio
             const x$ = cheerio.load(output.body);
-            const dataText = x$('#pf4').text().split('Fylke Antall positive')[1];
-            const regions = dataText.match(/\D+/g).slice(0,11).map(region => region.trim())
-            const infectedNumbers = dataText.match(/\d+/g).slice(0,11).map(number => parseInt(number,10));
+            const dataText = x$('#pf5').text().split('Antall varslede per 100 000')[1];
+            const regions = dataText.match(/\D+/g).map(region => region.trim()).filter(region => region.length > 3)
+            const infectedNumbers = dataText.replace(/,/g,'.').match(/[+-]?([0-9]*[.])?[0-9]+/g).map((number,i) => i%3 === 0 ? parseFloat(number) : null).filter(number=>number);
 
             const infectedByRegion = regions.map((region,index) => ({
                 region: region,
@@ -42,8 +42,7 @@ Apify.main(async () => {
 
             const data = {
                 infected,
-                deaths: parseInt($('li').text().match(/\d+ dødsfall/)[0].replace(' dødsfall',''),10),
-                tested: parseInt($($('li').filter((i,el) => $(el).text().includes('er testet')).get(0)).text().split('er testet')[0].replace(/ /g,'')),
+                deaths: parseInt(x$('html').text().match(/\d+ dødsfall/)[0].replace(' dødsfall',''),10),
                 infectedByRegion,
                 sourceUrl,
                 lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
