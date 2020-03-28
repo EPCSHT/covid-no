@@ -30,6 +30,7 @@ Apify.main(async () => {
             const data = {
                 infected,
                 deaths: parseInt($('html').text().match(/\d+ deaths/)[0].replace(' deaths',''),10),
+                tested: parseInt($('html').text().match(/\d+ \d+ have been tested/)[0].replace(/have been tested| /g,''),10),
                 infectedByRegion,
                 sourceUrl,
                 lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
