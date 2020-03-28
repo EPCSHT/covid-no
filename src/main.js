@@ -2,7 +2,7 @@ const Apify = require('apify');
 const cheerio = require('cheerio');
 
 const { log } = Apify.utils;
-const sourceUrl = 'https://www.fhi.no/sv/smittsomme-sykdommer/corona/dags--og-ukerapporter/dags--og-ukerapporter-om-koronavirus/';
+const sourceUrl = 'https://www.fhi.no/en/id/infectious-diseases/coronavirus/daily-reports/daily-reports-COVID19/';
 const LATEST = 'LATEST';
 
 Apify.main(async () => {
@@ -20,29 +20,16 @@ Apify.main(async () => {
             log.info('Page loaded.');
             const now = new Date();
 
-            const latestPdfURL = "https://www.fhi.no" + $($('.fhi-list li a').get(0)).attr('href');
+            const infectedByRegion = $('.standardTable tr').map((i,el) => ({
+                region: $($(el).find('td').get(0)).text().trim(),
+                infectedCount: parseInt($($(el).find('td').get(1)).text().trim(),10),
+            })).get().filter(val => val.region !== 'County')
 
-            // Parse PDF into HTML
-            const { output } = await Apify.call('jancurn/pdf-to-html', {
-                url: latestPdfURL
-            });
-
-            // Load with Cheerio
-            const x$ = cheerio.load(output.body);
-            const dataText = x$('#pf5').text().split('Antall varslede per 100 000')[1];
-            const regions = dataText.match(/\D+/g).map(region => region.trim()).filter(region => region.length > 3)
-            const infectedNumbers = dataText.replace(/,/g,'.').match(/[+-]?([0-9]*[.])?[0-9]+/g).map((number,i) => i%3 === 0 ? parseFloat(number) : null).filter(number=>number);
-
-            const infectedByRegion = regions.map((region,index) => ({
-                region: region,
-                infectedCount: infectedNumbers[index]
-            }))
-
-            const infected = infectedNumbers.reduce((sum,val) => sum+=val,0);
+            const infected = infectedByRegion.reduce((sum,val) => sum+=val.infectedCount,0);
 
             const data = {
                 infected,
-                deaths: parseInt(x$('html').text().match(/\d+ dødsfall/)[0].replace(' dødsfall',''),10),
+                deaths: parseInt($('html').text().match(/\d+ deaths/)[0].replace(' deaths',''),10),
                 infectedByRegion,
                 sourceUrl,
                 lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
