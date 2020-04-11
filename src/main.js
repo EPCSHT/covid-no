@@ -23,7 +23,7 @@ Apify.main(async () => {
             const infectedByRegion = $('.standardTable tr').map((i,el) => ({
                 region: $($(el).find('td').get(0)).text().trim(),
                 infectedCount: parseInt($($(el).find('td').get(1)).text().trim(),10),
-            })).get().filter(val => val.region !== 'County')
+            })).get().filter(val => val.region !== 'County').slice(12)
 
             const infected = infectedByRegion.reduce((sum,val) => sum+=val.infectedCount,0);
 
